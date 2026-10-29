@@ -96,10 +96,3 @@ MedFlow/
    npm run build
    ```
 
----
-
-## 💡 Why This Project Impresses Interviewers
-
-- **Solves a Real Healthcare Business Challenge**: Addresses Medicare HRRP readmission penalties and bed occupancy management.
-- **SQL Depth**: Showcases production SQL logic (`LAG`, `LEAD`, `CTEs`, `DENSE_RANK`, conditional aggregation) rather than simple `SELECT` queries.
-- **Interactive Storytelling**: Combines executive KPI summaries with granular drill-down pages and live SQL query execution.

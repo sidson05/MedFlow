@@ -38,9 +38,9 @@ function DashboardContent() {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-[#121316] text-[#F1F5F9] min-h-screen">
+    <div className="flex-1 flex flex-col min-w-0 bg-bg text-ink min-h-screen">
       <Header />
-      <main className="flex-1 px-8 py-6 overflow-y-auto">
+      <main className="flex-1 p-8 overflow-y-auto">
         {renderTabContent()}
       </main>
     </div>
@@ -50,7 +50,7 @@ function DashboardContent() {
 export default function App() {
   return (
     <DashboardProvider>
-      <div className="flex min-h-screen bg-[#121316]">
+      <div className="flex min-h-screen bg-bg text-ink">
         <Sidebar />
         <DashboardContent />
       </div>

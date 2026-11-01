@@ -1,0 +1,6 @@
+Dept_ID,Department,Total_Beds,Occupied_Beds,Bed_Occupancy_Rate,Head_Doctor,Avg_LOS_Days,Annual_Budget
+D-101,General Ward,150,118,78.7,Dr. N. Roy,4.8,₹1.2 Cr
+D-102,ICU,45,39,86.7,Dr. M. Chawla,6.2,₹2.8 Cr
+D-103,Cardiology,60,48,80.0,Dr. A. Mehta,4.1,₹2.1 Cr
+D-104,Orthopedics,40,28,70.0,Dr. K. Joshi,3.9,₹1.5 Cr
+D-105,Pediatrics,35,22,62.9,Dr. S. Banerjee,3.2,₹90 Lakhs

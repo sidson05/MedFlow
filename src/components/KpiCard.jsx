@@ -2,27 +2,26 @@ import React from 'react';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 
 export default function KpiCard({ title, value, change, isPositive = true, subtext = "vs last period" }) {
-  // Determine color based on indicator (green for good, red for bad)
   const isUp = change.startsWith('+') || change.includes('↑');
 
   return (
-    <div className="health-card p-5 flex flex-col justify-between hover:border-[#3B82F6]/40 transition-all duration-200">
-      <span className="text-xs font-medium text-[#94A3B8] tracking-wide">{title}</span>
+    <div className="health-card p-[21px] flex flex-col justify-between hover:border-accent/35 transition-all">
+      <span className="text-[12.5px] font-medium text-muted tracking-wide">{title}</span>
       
-      <div className="mt-3 mb-2">
-        <h2 className="text-3xl font-extrabold text-white tracking-tight leading-none">{value}</h2>
+      <div className="my-2">
+        <h2 className="font-serif font-semibold text-[32px] text-ink leading-tight tracking-tight">{value}</h2>
       </div>
 
-      <div className="flex items-center space-x-1.5 mt-1 text-xs">
-        <span className={`inline-flex items-center font-medium ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+      <div className="flex items-center text-[12px]">
+        <span className={`inline-flex items-center font-medium ${isPositive ? 'text-good' : 'text-bad'}`}>
           {isUp ? (
-            <ArrowUp className="w-3.5 h-3.5 mr-0.5" />
+            <ArrowUp className="w-3 h-3 mr-0.5" strokeWidth={2} />
           ) : (
-            <ArrowDown className="w-3.5 h-3.5 mr-0.5" />
+            <ArrowDown className="w-3 h-3 mr-0.5" strokeWidth={2} />
           )}
           {change}
         </span>
-        <span className="text-[#64748B] font-normal">{subtext}</span>
+        <span className="text-muted ml-1.5">{subtext}</span>
       </div>
     </div>
   );

@@ -22,10 +22,40 @@ export function DashboardProvider({ children }) {
   const [paymentFilter, setPaymentFilter] = useState('All');
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [patientsList, setPatientsList] = useState(PATIENTS_DIRECTORY);
+
+  // Add Patient Action
+  const addPatient = (patientData) => {
+    const newId = `P-${Math.floor(1000 + Math.random() * 9000)}`;
+    const daysOut = patientData.daysOut ? Number(patientData.daysOut) : null;
+    let calculatedRisk = 'Low';
+    if (daysOut !== null && daysOut <= 10) calculatedRisk = 'High';
+    else if (daysOut !== null && daysOut <= 20) calculatedRisk = 'Medium';
+    else if (patientData.diagnosis?.toLowerCase().includes('heart') || patientData.dept === 'ICU') calculatedRisk = 'High';
+
+    const fullPatient = {
+      id: newId,
+      name: patientData.name,
+      age: Number(patientData.age),
+      gender: patientData.gender,
+      dept: patientData.dept,
+      diagnosis: patientData.diagnosis,
+      admissionDate: patientData.admissionDate || new Date().toISOString().split('T')[0],
+      dischargeDate: patientData.dischargeDate || new Date(Date.now() + 4 * 86400000).toISOString().split('T')[0],
+      readmitDate: daysOut ? new Date().toISOString().split('T')[0] : null,
+      daysOut: daysOut,
+      risk: patientData.risk || calculatedRisk,
+      billing: patientData.billing.startsWith('₹') ? patientData.billing : `₹${patientData.billing}`,
+      paymentStatus: patientData.paymentStatus || 'Pending'
+    };
+
+    setPatientsList(prev => [fullPatient, ...prev]);
+    return fullPatient;
+  };
 
   // 1. Dynamic Patient Filter
   const filteredPatients = useMemo(() => {
-    return PATIENTS_DIRECTORY.filter(patient => {
+    return patientsList.filter(patient => {
       const matchesDept = selectedDepartment === 'All departments' || 
         patient.dept.toLowerCase() === selectedDepartment.toLowerCase();
       
@@ -45,7 +75,7 @@ export function DashboardProvider({ children }) {
 
       return matchesDept && matchesDiagnosis && matchesRisk && matchesPayment && matchesSearch;
     });
-  }, [selectedDepartment, selectedDiagnosis, riskFilter, paymentFilter, searchQuery]);
+  }, [patientsList, selectedDepartment, selectedDiagnosis, riskFilter, paymentFilter, searchQuery]);
 
   // 2. Dynamic KPI Calculation
   const kpiData = useMemo(() => {
@@ -86,6 +116,9 @@ export function DashboardProvider({ children }) {
     } else if (selectedDiagnosis === 'Trauma') {
       admissionsBase = Math.round(admissionsBase * 0.16);
       readmissionBase = 7.5;
+    } else if (selectedDiagnosis === 'Diabetes') {
+      admissionsBase = Math.round(admissionsBase * 0.14);
+      readmissionBase = 8.9;
     }
 
     if (dateRange === 'Q1 2024 (Jan-Mar)') {
@@ -131,9 +164,31 @@ export function DashboardProvider({ children }) {
       if (dateRange === 'Q1 2024 (Jan-Mar)' && ['Apr', 'May', 'Jun'].includes(row.month)) multiplier = 0;
       if (dateRange === 'Q2 2024 (Apr-Jun)' && ['Jan', 'Feb', 'Mar'].includes(row.month)) multiplier = 0;
 
-      let gw = Math.round(row.generalWard * multiplier);
-      let icu = Math.round(row.icu * multiplier);
-      let card = Math.round(row.cardiology * multiplier);
+      let gwMultiplier = 1;
+      let icuMultiplier = 1;
+      let cardMultiplier = 1;
+
+      if (selectedDiagnosis === 'Cardiac') {
+        gwMultiplier = 0.35;
+        icuMultiplier = 0.50;
+        cardMultiplier = 1.0;
+      } else if (selectedDiagnosis === 'Respiratory') {
+        gwMultiplier = 0.45;
+        icuMultiplier = 0.35;
+        cardMultiplier = 0.10;
+      } else if (selectedDiagnosis === 'Trauma') {
+        gwMultiplier = 0.40;
+        icuMultiplier = 0.20;
+        cardMultiplier = 0.05;
+      } else if (selectedDiagnosis === 'Diabetes') {
+        gwMultiplier = 0.50;
+        icuMultiplier = 0.15;
+        cardMultiplier = 0.05;
+      }
+
+      let gw = Math.round(row.generalWard * multiplier * gwMultiplier);
+      let icu = Math.round(row.icu * multiplier * icuMultiplier);
+      let card = Math.round(row.cardiology * multiplier * cardMultiplier);
 
       if (selectedDepartment === 'General Ward') { icu = 0; card = 0; }
       else if (selectedDepartment === 'ICU') { gw = 0; card = 0; }
@@ -147,24 +202,40 @@ export function DashboardProvider({ children }) {
         total: gw + icu + card
       };
     });
-  }, [selectedDepartment, dateRange]);
+  }, [selectedDepartment, selectedDiagnosis, dateRange]);
 
   // 4. Dynamic Diagnosis Chart
   const diagnosisData = useMemo(() => {
     if (selectedDiagnosis === 'Cardiac') {
       return [
-        { name: "Cardiac", value: 100, color: "#3B82F6" },
-        { name: "Respiratory", value: 0, color: "#10B981" },
-        { name: "Trauma", value: 0, color: "#F59E0B" },
-        { name: "Other", value: 0, color: "#EC4899" }
+        { name: "Cardiac", value: 100, color: "var(--c1)" },
+        { name: "Respiratory", value: 0, color: "var(--c2)" },
+        { name: "Trauma", value: 0, color: "var(--c3)" },
+        { name: "Other", value: 0, color: "var(--c4)" }
       ];
     }
     if (selectedDiagnosis === 'Respiratory') {
       return [
-        { name: "Cardiac", value: 0, color: "#3B82F6" },
-        { name: "Respiratory", value: 100, color: "#10B981" },
-        { name: "Trauma", value: 0, color: "#F59E0B" },
-        { name: "Other", value: 0, color: "#EC4899" }
+        { name: "Cardiac", value: 0, color: "var(--c1)" },
+        { name: "Respiratory", value: 100, color: "var(--c2)" },
+        { name: "Trauma", value: 0, color: "var(--c3)" },
+        { name: "Other", value: 0, color: "var(--c4)" }
+      ];
+    }
+    if (selectedDiagnosis === 'Trauma') {
+      return [
+        { name: "Cardiac", value: 0, color: "var(--c1)" },
+        { name: "Respiratory", value: 0, color: "var(--c2)" },
+        { name: "Trauma", value: 100, color: "var(--c3)" },
+        { name: "Other", value: 0, color: "var(--c4)" }
+      ];
+    }
+    if (selectedDiagnosis === 'Diabetes') {
+      return [
+        { name: "Cardiac", value: 0, color: "var(--c1)" },
+        { name: "Respiratory", value: 0, color: "var(--c2)" },
+        { name: "Trauma", value: 0, color: "var(--c3)" },
+        { name: "Other", value: 100, color: "var(--c4)" }
       ];
     }
     return DIAGNOSIS_DISTRIBUTION;
@@ -178,7 +249,8 @@ export function DashboardProvider({ children }) {
         p.diagnosis.toLowerCase().includes(selectedDiagnosis.toLowerCase()) ||
         (selectedDiagnosis === 'Cardiac' && p.diagnosis.toLowerCase().includes('heart')) ||
         (selectedDiagnosis === 'Respiratory' && (p.diagnosis.toLowerCase().includes('pneumonia') || p.diagnosis.toLowerCase().includes('copd'))) ||
-        (selectedDiagnosis === 'Trauma' && p.diagnosis.toLowerCase().includes('hip'));
+        (selectedDiagnosis === 'Trauma' && p.diagnosis.toLowerCase().includes('hip')) ||
+        (selectedDiagnosis === 'Diabetes' && p.diagnosis.toLowerCase().includes('diabet'));
       const matchesRisk = riskFilter === 'All' || p.risk.toLowerCase() === riskFilter.toLowerCase();
 
       return matchesDept && matchesDiagnosis && matchesRisk;
@@ -193,6 +265,11 @@ export function DashboardProvider({ children }) {
       else if (selectedDepartment === 'ICU') multiplier = 0.45;
       else if (selectedDepartment === 'General Ward') multiplier = 0.20;
 
+      if (selectedDiagnosis === 'Cardiac') multiplier *= 0.30;
+      else if (selectedDiagnosis === 'Respiratory') multiplier *= 0.20;
+      else if (selectedDiagnosis === 'Trauma') multiplier *= 0.16;
+      else if (selectedDiagnosis === 'Diabetes') multiplier *= 0.14;
+
       return {
         month: r.month,
         collected: Number((r.collected * multiplier).toFixed(1)),
@@ -200,7 +277,7 @@ export function DashboardProvider({ children }) {
         total: Number((r.total * multiplier).toFixed(1))
       };
     });
-  }, [selectedDepartment]);
+  }, [selectedDepartment, selectedDiagnosis]);
 
   const revenueSummary = useMemo(() => {
     const totalColl = revenueData.reduce((acc, curr) => acc + curr.collected, 0).toFixed(1);
@@ -256,6 +333,7 @@ export function DashboardProvider({ children }) {
     revenueData,
     revenueSummary,
     patients: filteredPatients,
+    addPatient,
     departments: DEPARTMENTS_DATA,
     doctors: DOCTORS_DATA,
     activeFilterCount,

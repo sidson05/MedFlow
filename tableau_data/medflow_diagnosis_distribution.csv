@@ -1,0 +1,5 @@
+Category,Percentage,Sub_Conditions,Color_Hex
+Cardiac,30,"Heart failure, Arrhythmia, CAD, Myocardial Infarction",#3B82F6
+Respiratory,20,"Pneumonia, COPD, Asthma exacerbation",#10B981
+Trauma,16,"Hip fracture, Multiple trauma, Joint dislocation",#F59E0B
+Other,34,"Diabetes, Acute Appendicitis, Sepsis, Renal",#EC4899

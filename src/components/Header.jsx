@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Calendar, ChevronDown, SlidersHorizontal, Search, RotateCcw, Check, X } from 'lucide-react';
+import { Calendar, ChevronDown, SlidersHorizontal, Search, RotateCcw, Check, X, Download } from 'lucide-react';
 import { useDashboard } from '../context/DashboardContext';
 
 export default function Header() {
@@ -18,7 +18,10 @@ export default function Header() {
     searchQuery,
     setSearchQuery,
     activeFilterCount,
-    resetAllSlicers
+    resetAllSlicers,
+    patients,
+    departments,
+    doctors
   } = useDashboard();
 
   const [showDateMenu, setShowDateMenu] = useState(false);
@@ -48,39 +51,100 @@ export default function Header() {
     { id: 'Last 30 Days', label: 'Last 30 Days' }
   ];
 
-  const getTitle = () => {
+  const getHeaderMeta = () => {
     switch (activeTab) {
-      case 'overview': return 'Hospital overview';
-      case 'patients': return 'Patient Records & Readmissions';
-      case 'departments': return 'Department Performance & Bed Capacity';
-      case 'readmissions': return '30-Day Readmission Risk Tracker';
-      case 'doctors': return 'Doctor Load & Recovery Analytics';
-      case 'billing': return 'Financial & Billing Insights';
-      case 'sqlStudio': return 'SQL Analytics Query Studio';
-      case 'config': return 'System Settings & Config';
-      default: return 'Hospital overview';
+      case 'overview':
+        return {
+          title: 'Hospital overview',
+          subtitle: 'Performance, patient flow and revenue at a glance'
+        };
+      case 'patients':
+        return {
+          title: 'Patient records & admissions',
+          subtitle: 'Directory of patient stays, diagnoses and return risk profiles'
+        };
+      case 'departments':
+        return {
+          title: 'Department performance',
+          subtitle: 'Bed capacity, occupancy rates and length of stay benchmarks'
+        };
+      case 'readmissions':
+        return {
+          title: '30-day readmission analytics',
+          subtitle: 'HRRP compliance tracking, risk scoring and window intervals'
+        };
+      case 'doctors':
+        return {
+          title: 'Physician analytics & workload',
+          subtitle: 'Recovery durations, clinical caseloads and doctor ratings'
+        };
+      case 'billing':
+        return {
+          title: 'Financial & revenue insights',
+          subtitle: 'Collections trajectory, pending dues and insurance settlements'
+        };
+      case 'sqlStudio':
+        return {
+          title: 'SQL query studio',
+          subtitle: 'Analytical SQL execution against the relational hospital schema'
+        };
+      case 'config':
+        return {
+          title: 'System configuration',
+          subtitle: 'Database re-seeding, external BI exports and parameters'
+        };
+      default:
+        return {
+          title: 'Hospital overview',
+          subtitle: 'Performance, patient flow and revenue at a glance'
+        };
     }
   };
 
+  const handleExportReport = () => {
+    const reportData = {
+      period: dateRange,
+      department: selectedDepartment,
+      diagnosis: selectedDiagnosis,
+      filters: { riskFilter, paymentFilter },
+      exportedAt: new Date().toISOString(),
+      summary: {
+        totalPatients: patients.length,
+        totalDepartments: departments.length,
+        totalDoctors: doctors.length
+      }
+    };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(reportData, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `medflow_hospital_report_${dateRange.replace(/[\s–()]/g, '_')}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  };
+
+  const { title, subtitle } = getHeaderMeta();
+
   return (
-    <header className="bg-[#121316] border-b border-[#2A2D3A] px-8 py-5 flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-20">
-      {/* Title */}
+    <header className="bg-panel border-b border-line px-8 py-5 flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-20">
+      {/* Title & Subtitle */}
       <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">{getTitle()}</h1>
+        <h1 className="font-serif font-semibold text-[31px] text-ink leading-tight tracking-tight">{title}</h1>
+        <p className="text-[12.5px] text-muted mt-0.5">{subtitle}</p>
       </div>
 
       {/* Global Slicers & Filters */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2.5">
         {/* Search Input for relevant pages */}
         {(activeTab === 'patients' || activeTab === 'doctors') && (
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B]" />
+            <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
             <input
               type="text"
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-[#1A1C23] border border-[#2A2D3A] text-white text-xs rounded-lg pl-9 pr-3 py-2 focus:outline-none focus:border-blue-500 w-44"
+              className="bg-panel border border-line text-ink text-xs rounded-full pl-9 pr-3.5 py-2 focus:outline-none focus:border-accent w-44 shadow-2xs"
             />
           </div>
         )}
@@ -90,16 +154,16 @@ export default function Header() {
           <button 
             type="button"
             onClick={() => setShowDateMenu(!showDateMenu)}
-            className="flex items-center space-x-2 bg-[#1A1C23] hover:bg-[#252833] border border-blue-500/40 text-blue-400 px-3.5 py-2 rounded-lg text-xs font-semibold shadow-sm transition-all cursor-pointer"
+            className="flex items-center space-x-2 bg-panel hover:bg-panel2 border border-line text-ink px-3.5 py-2 rounded-full text-xs font-medium shadow-2xs transition-colors cursor-pointer"
           >
-            <Calendar className="w-3.5 h-3.5 text-blue-400" />
+            <Calendar className="w-3.5 h-3.5 text-accent" />
             <span>{dateRange}</span>
-            <ChevronDown className={`w-3 h-3 text-blue-400 ml-1 transition-transform ${showDateMenu ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-3 h-3 text-muted ml-0.5 transition-transform ${showDateMenu ? 'rotate-180' : ''}`} />
           </button>
 
           {showDateMenu && (
-            <div className="absolute right-0 mt-2 w-56 bg-[#1A1C23] border border-[#2A2D3A] rounded-xl shadow-2xl z-50 p-1.5 space-y-1 animate-in fade-in duration-150">
-              <span className="text-[10px] uppercase font-bold text-[#64748B] px-3 py-1 block tracking-wider">
+            <div className="absolute right-0 mt-2 w-56 bg-panel border border-line rounded-xl shadow-lg z-50 p-1.5 space-y-1">
+              <span className="text-[10px] uppercase font-semibold text-muted px-3 py-1 block tracking-wider">
                 Select Date Range
               </span>
               {dateOptions.map((opt) => (
@@ -109,14 +173,14 @@ export default function Header() {
                     setDateRange(opt.id);
                     setShowDateMenu(false);
                   }}
-                  className={`w-full flex items-center justify-between px-3 py-2 text-xs rounded-lg font-medium transition-all ${
+                  className={`w-full flex items-center justify-between px-3 py-2 text-xs rounded-lg font-medium transition-colors ${
                     dateRange === opt.id 
-                      ? 'bg-blue-600/20 text-blue-400 font-bold' 
-                      : 'text-[#94A3B8] hover:text-white hover:bg-[#252833]'
+                      ? 'bg-accentSoft text-accent font-semibold' 
+                      : 'text-ink hover:bg-panel2'
                   }`}
                 >
                   <span>{opt.label}</span>
-                  {dateRange === opt.id && <Check className="w-3.5 h-3.5 text-blue-400" />}
+                  {dateRange === opt.id && <Check className="w-3.5 h-3.5 text-accent" />}
                 </button>
               ))}
             </div>
@@ -128,7 +192,7 @@ export default function Header() {
           <select
             value={selectedDepartment}
             onChange={(e) => setSelectedDepartment(e.target.value)}
-            className="bg-[#1A1C23] border border-[#2A2D3A] text-white text-xs font-medium rounded-lg px-3.5 py-2 appearance-none pr-8 cursor-pointer focus:outline-none focus:border-blue-500 hover:bg-[#252833] transition-all"
+            className="bg-panel border border-line text-ink text-xs font-medium rounded-full pl-3.5 pr-8 py-2 appearance-none cursor-pointer hover:bg-panel2 shadow-2xs focus:outline-none focus:border-accent transition-colors"
           >
             <option value="All departments">All departments</option>
             <option value="General Ward">General Ward</option>
@@ -137,7 +201,7 @@ export default function Header() {
             <option value="Pulmonology">Pulmonology</option>
             <option value="Orthopedics">Orthopedics</option>
           </select>
-          <ChevronDown className="w-3.5 h-3.5 text-[#94A3B8] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <ChevronDown className="w-3.5 h-3.5 text-muted absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
 
         {/* 3. Diagnosis Slicer */}
@@ -145,7 +209,7 @@ export default function Header() {
           <select
             value={selectedDiagnosis}
             onChange={(e) => setSelectedDiagnosis(e.target.value)}
-            className="bg-[#1A1C23] border border-[#2A2D3A] text-white text-xs font-medium rounded-lg px-3.5 py-2 appearance-none pr-8 cursor-pointer focus:outline-none focus:border-blue-500 hover:bg-[#252833] transition-all"
+            className="bg-panel border border-line text-ink text-xs font-medium rounded-full pl-3.5 pr-8 py-2 appearance-none cursor-pointer hover:bg-panel2 shadow-2xs focus:outline-none focus:border-accent transition-colors"
           >
             <option value="All diagnoses">All diagnoses</option>
             <option value="Cardiac">Cardiac (Heart failure)</option>
@@ -153,7 +217,7 @@ export default function Header() {
             <option value="Trauma">Trauma (Hip fracture)</option>
             <option value="Diabetes">Endocrine (Diabetes)</option>
           </select>
-          <ChevronDown className="w-3.5 h-3.5 text-[#94A3B8] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <ChevronDown className="w-3.5 h-3.5 text-muted absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
 
         {/* 4. More Filters Popover Panel */}
@@ -161,28 +225,28 @@ export default function Header() {
           <button 
             type="button"
             onClick={() => setShowMorePopover(!showMorePopover)}
-            className={`flex items-center space-x-1.5 border px-3 py-2 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+            className={`flex items-center space-x-1.5 border px-3.5 py-2 rounded-full text-xs font-medium transition-colors cursor-pointer shadow-2xs ${
               activeFilterCount > 0 
-                ? 'bg-blue-600/15 border-blue-500 text-blue-400 font-semibold' 
-                : 'bg-[#1A1C23] border-[#2A2D3A] text-[#94A3B8] hover:text-white hover:bg-[#252833]'
+                ? 'bg-accentSoft border-accent/40 text-accent font-semibold' 
+                : 'bg-panel border-line text-ink hover:bg-panel2'
             }`}
           >
-            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <SlidersHorizontal className="w-3.5 h-3.5 text-muted" />
             <span>More</span>
             {activeFilterCount > 0 && (
-              <span className="ml-1 bg-blue-600 text-white font-bold rounded-full w-4 h-4 text-[10px] flex items-center justify-center">
+              <span className="ml-1 bg-accent text-forestTx font-semibold rounded-full w-4 h-4 text-[10px] flex items-center justify-center">
                 {activeFilterCount}
               </span>
             )}
           </button>
 
           {showMorePopover && (
-            <div className="absolute right-0 mt-2 w-64 bg-[#1A1C23] border border-[#2A2D3A] rounded-xl shadow-2xl z-50 p-4 space-y-4 animate-in fade-in duration-150">
-              <div className="flex items-center justify-between pb-2 border-b border-[#2A2D3A]">
-                <span className="text-xs font-bold text-white">Advanced Slicers</span>
+            <div className="absolute right-0 mt-2 w-64 bg-panel border border-line rounded-2xl shadow-xl z-50 p-4 space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-line">
+                <span className="text-xs font-semibold text-ink">Advanced slicers</span>
                 <button 
                   onClick={() => setShowMorePopover(false)}
-                  className="text-[#64748B] hover:text-white"
+                  className="text-muted hover:text-ink transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -190,11 +254,11 @@ export default function Header() {
 
               {/* Risk Level Filter */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-[#94A3B8] block">Readmission Risk Level</label>
+                <label className="text-[11px] font-semibold text-muted block">Readmission risk level</label>
                 <select
                   value={riskFilter}
                   onChange={(e) => setRiskFilter(e.target.value)}
-                  className="w-full bg-[#121316] border border-[#2A2D3A] text-white text-xs rounded-lg p-2 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-panel border border-line text-ink text-xs rounded-lg p-2 focus:outline-none focus:border-accent"
                 >
                   <option value="All">All Risk Levels</option>
                   <option value="High">High Risk Only</option>
@@ -205,11 +269,11 @@ export default function Header() {
 
               {/* Billing Payment Status Filter */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-[#94A3B8] block">Payment Status</label>
+                <label className="text-[11px] font-semibold text-muted block">Payment status</label>
                 <select
                   value={paymentFilter}
                   onChange={(e) => setPaymentFilter(e.target.value)}
-                  className="w-full bg-[#121316] border border-[#2A2D3A] text-white text-xs rounded-lg p-2 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-panel border border-line text-ink text-xs rounded-lg p-2 focus:outline-none focus:border-accent"
                 >
                   <option value="All">All Payment Statuses</option>
                   <option value="Paid">Paid Only</option>
@@ -226,15 +290,25 @@ export default function Header() {
                     resetAllSlicers();
                     setShowMorePopover(false);
                   }}
-                  className="w-full flex items-center justify-center space-x-1.5 bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-400 py-2 rounded-lg text-xs font-bold transition-all"
+                  className="w-full flex items-center justify-center space-x-1.5 bg-bad/10 hover:bg-bad/15 border border-bad/20 text-bad py-2 rounded-full text-xs font-semibold transition-colors cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
-                  <span>Reset All Slicers ({activeFilterCount})</span>
+                  <span>Reset all slicers ({activeFilterCount})</span>
                 </button>
               )}
             </div>
           )}
         </div>
+
+        {/* 5. Forest Pill Button: Export Report */}
+        <button
+          type="button"
+          onClick={handleExportReport}
+          className="bg-forest hover:opacity-95 text-forestTx rounded-full px-4 py-2 text-xs font-semibold shadow-2xs transition-all flex items-center space-x-1.5 cursor-pointer ml-1"
+        >
+          <Download className="w-3.5 h-3.5 text-forestTx" />
+          <span>Export report</span>
+        </button>
       </div>
     </header>
   );

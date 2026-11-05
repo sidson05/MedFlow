@@ -5,7 +5,13 @@ import { Search, UserCheck, Calendar, Stethoscope, Clock, CreditCard, UserPlus, 
 
 export default function PatientsPage() {
   const { patients, selectedPatient, setSelectedPatient, searchQuery, setSearchQuery, addPatient } = useDashboard();
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(() => {
+    try {
+      return new URLSearchParams(window.location.search).get('modal') === 'addPatient';
+    } catch {
+      return false;
+    }
+  });
   const [successToast, setSuccessToast] = useState(false);
 
   const [formData, setFormData] = useState({

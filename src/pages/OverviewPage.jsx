@@ -147,6 +147,7 @@ export default function OverviewPage() {
                   name="General ward" 
                   fill="var(--c1)" 
                   radius={[4, 4, 0, 0]} 
+                  isAnimationActive={false} 
                   opacity={hoveredBar === null ? 1 : 0.9}
                 />
                 <Bar 
@@ -154,6 +155,7 @@ export default function OverviewPage() {
                   name="ICU" 
                   fill="var(--c2)" 
                   radius={[4, 4, 0, 0]} 
+                  isAnimationActive={false} 
                   opacity={hoveredBar === null ? 1 : 0.9}
                 />
                 <Bar 
@@ -161,6 +163,7 @@ export default function OverviewPage() {
                   name="Cardiology" 
                   fill="var(--c3)" 
                   radius={[4, 4, 0, 0]} 
+                  isAnimationActive={false} 
                   opacity={hoveredBar === null ? 1 : 0.9}
                 />
               </BarChart>
@@ -195,6 +198,7 @@ export default function OverviewPage() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
+                  isAnimationActive={false}
                   data={diagnosisData}
                   cx="50%"
                   cy="50%"
@@ -379,6 +383,7 @@ export default function OverviewPage() {
                 />
                 <Tooltip content={<CustomAreaTooltip />} />
                 <Area 
+                  isAnimationActive={false} 
                   type="monotone" 
                   dataKey="collected" 
                   stroke="var(--acc)" 

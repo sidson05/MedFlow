@@ -10,6 +10,38 @@ An enterprise-grade **Patient Readmission & Hospital Performance Analysis** plat
 
 ---
 
+## 📸 Application Showcase
+
+### 1. Executive Hospital Overview Dashboard
+![MedFlow Hospital Overview Dashboard](docs/screenshots/01-hospital-overview.png)
+*Executive dashboard featuring 4 core KPIs, Recharts grouped monthly admissions by department, clinical diagnosis donut breakdown, 30-day readmission risk progress meters, and monthly billing collection area trajectory.*
+
+---
+
+### 2. Patient Directory & Cohort Management
+![MedFlow Patient Directory](docs/screenshots/02-patient-directory.png)
+*Granular patient records with clinical department filtering, HRRP risk badges (High / Medium / Low), instant name/diagnosis search, and deep-dive patient details.*
+
+---
+
+### 3. Patient Admission Intake & HRRP Risk Scoring Flow
+![MedFlow Patient Admission Modal](docs/screenshots/03-patient-admission-intake.png)
+*Interactive patient intake flow allowing instant admissions with real-time automated 30-day readmission risk tier calculation ($\le 10\text{d}$: High, $\le 20\text{d}$: Medium, $> 20\text{d}$: Low).*
+
+---
+
+### 4. In-Browser SQL Query Studio & Analytical Suite
+![MedFlow SQL Query Studio](docs/screenshots/04-sql-query-studio.png)
+*Client-side analytical query runner demonstrating CTEs, `LAG()` window functions, and `DENSE_RANK()` with sub-millisecond execution times and interactive results tables.*
+
+---
+
+### 5. 30-Day Readmission & HRRP Compliance Analytics
+![MedFlow Readmission Analytics](docs/screenshots/05-readmissions-analytics.png)
+*Detailed return interval tracking, clinical risk driver isolation (Heart Failure, Pneumonia, COPD), and SQL window function logic walkthroughs.*
+
+---
+
 ## 🌟 Key Features
 
 ### 1. 📊 Executive Overview Dashboard
@@ -55,6 +87,13 @@ MedFlow/
 ├── .github/
 │   └── workflows/
 │       └── deploy.yml                   # Automated GitHub Actions deployment pipeline
+├── docs/
+│   └── screenshots/                     # High-resolution application preview screenshots
+│       ├── 01-hospital-overview.png
+│       ├── 02-patient-directory.png
+│       ├── 03-patient-admission-intake.png
+│       ├── 04-sql-query-studio.png
+│       └── 05-readmissions-analytics.png
 ├── tableau_data/                        # Pre-calibrated datasets for Tableau Public
 │   ├── medflow_admissions_4812.csv      # Master granular 4,812-row admissions dataset
 │   ├── medflow_stayq_enriched_4812.csv  # Enriched dataset with StayQ velocity tiers

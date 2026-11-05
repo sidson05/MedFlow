@@ -14,7 +14,14 @@ import {
 const DashboardContext = createContext();
 
 export function DashboardProvider({ children }) {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState(() => {
+    try {
+      const tab = new URLSearchParams(window.location.search).get('tab');
+      return tab || 'overview';
+    } catch {
+      return 'overview';
+    }
+  });
   const [dateRange, setDateRange] = useState('Jan – Jun 2024');
   const [selectedDepartment, setSelectedDepartment] = useState('All departments');
   const [selectedDiagnosis, setSelectedDiagnosis] = useState('All diagnoses');
